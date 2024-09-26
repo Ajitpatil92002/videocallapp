@@ -5,13 +5,20 @@ import { useSocket } from '../context/socket-provider';
 const LobbyPage = () => {
     const [email, setEmail] = useState('');
     const [roomId, setRoomId] = useState('');
+    const [roomType, setRoomType] = useState<'one-to-one' | 'one-to-many'>(
+        'one-to-one'
+    );
 
     const socket = useSocket();
     const navigate = useNavigate();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        socket.emit('room:join', { email, room: roomId });
+        if (roomType === 'one-to-one') {
+            socket.emit('room:join', { email, room: roomId });
+        } else {
+            navigate(`/multiroom/${roomId}`);
+        }
     };
 
     const handleJoinRoom = useCallback((data: { room: string }) => {
@@ -64,6 +71,33 @@ const LobbyPage = () => {
                             className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                             required
                         />
+                    </div>
+                    <div>
+                        <label className='block text-sm font-medium text-gray-700 mb-1'>
+                            Room Type
+                        </label>
+                        <div className='flex space-x-4'>
+                            <label className='flex items-center'>
+                                <input
+                                    type='radio'
+                                    value='one-to-one'
+                                    checked={roomType === 'one-to-one'}
+                                    onChange={() => setRoomType('one-to-one')}
+                                    className='mr-2'
+                                />
+                                One-to-One
+                            </label>
+                            <label className='flex items-center'>
+                                <input
+                                    type='radio'
+                                    value='one-to-many'
+                                    checked={roomType === 'one-to-many'}
+                                    onChange={() => setRoomType('one-to-many')}
+                                    className='mr-2'
+                                />
+                                One-to-Many
+                            </label>
+                        </div>
                     </div>
                     <button
                         type='submit'
